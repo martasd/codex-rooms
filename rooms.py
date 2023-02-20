@@ -45,7 +45,10 @@ def main():
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
         for calendar_list_entry in calendar_list["items"]:
             if "resource" in calendar_list_entry["id"]:
-                print(calendar_list_entry["summary"], end=" ")
+                print(
+                    calendar_list_entry["summary"].replace("Ostrava Office-3-", ""),
+                    end=" is ",
+                )
                 free_busy_query = {
                     "timeMin": datetime.datetime.utcnow().isoformat() + "Z",
                     "timeMax": (
@@ -60,13 +63,13 @@ def main():
                 )
                 if free_busy_response["calendars"][calendar_list_entry["id"]]["busy"]:
                     print(
-                        "Busy until:",
+                        "BUSY until:",
                         free_busy_response["calendars"][calendar_list_entry["id"]][
                             "busy"
-                        ][0]["end"],
+                        ][0]["end"][11:16],
                     )
                 else:
-                    print("Free")
+                    print("FREE")
         page_token = calendar_list.get("nextPageToken")
         if not page_token:
             break
