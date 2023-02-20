@@ -45,9 +45,7 @@ def main():
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
         for calendar_list_entry in calendar_list["items"]:
             if "resource" in calendar_list_entry["id"]:
-                print(
-                    calendar_list_entry["summary"], calendar_list_entry["id"], end=" "
-                )
+                print(calendar_list_entry["summary"], end=" ")
                 free_busy_query = {
                     "timeMin": datetime.datetime.utcnow().isoformat() + "Z",
                     "timeMax": (
@@ -61,7 +59,12 @@ def main():
                     service.freebusy().query(body=free_busy_query).execute()
                 )
                 if free_busy_response["calendars"][calendar_list_entry["id"]]["busy"]:
-                    print("Busy")
+                    print(
+                        "Busy until:",
+                        free_busy_response["calendars"][calendar_list_entry["id"]][
+                            "busy"
+                        ][0]["end"],
+                    )
                 else:
                     print("Free")
         page_token = calendar_list.get("nextPageToken")
