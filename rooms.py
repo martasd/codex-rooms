@@ -1,6 +1,6 @@
 # Python 3
-# Using, Google Calendar API get the list of all my Google calendars
-# and print the calendar names and their IDs
+# Using, Google Calendar API get the list of all my Google calendars which have the string 'resource' in its id
+# and print the calendar names and their IDs.
 
 from __future__ import print_function
 
@@ -43,7 +43,8 @@ def main():
     while True:
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
         for calendar_list_entry in calendar_list["items"]:
-            print(calendar_list_entry["summary"], calendar_list_entry["id"])
+            if "resource" in calendar_list_entry["id"]:
+                print(calendar_list_entry["summary"], calendar_list_entry["id"])
         page_token = calendar_list.get("nextPageToken")
         if not page_token:
             break
