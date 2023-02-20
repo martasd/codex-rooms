@@ -8,6 +8,7 @@ import datetime
 import os.path
 import pickle
 
+import colorama
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -17,6 +18,9 @@ SCOPES = [
     "https://www.googleapis.com/auth/calendar.readonly",
     "https://www.googleapis.com/auth/calendar.events",
 ]
+
+
+colorama.init()
 
 
 def main():
@@ -46,7 +50,8 @@ def main():
         for calendar_list_entry in calendar_list["items"]:
             if "resource" in calendar_list_entry["id"]:
                 print(
-                    calendar_list_entry["summary"].replace("Ostrava Office-3-", ""),
+                    colorama.Style.RESET_ALL
+                    + calendar_list_entry["summary"].replace("Ostrava Office-3-", ""),
                     end=" is ",
                 )
                 free_busy_query = {
@@ -63,13 +68,13 @@ def main():
                 )
                 if free_busy_response["calendars"][calendar_list_entry["id"]]["busy"]:
                     print(
-                        "BUSY until:",
+                        colorama.Fore.RED + "BUSY until:",
                         free_busy_response["calendars"][calendar_list_entry["id"]][
                             "busy"
                         ][0]["end"][11:16],
                     )
                 else:
-                    print("FREE")
+                    print(colorama.Fore.GREEN + "FREE")
         page_token = calendar_list.get("nextPageToken")
         if not page_token:
             break

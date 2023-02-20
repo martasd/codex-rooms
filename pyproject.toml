@@ -10,6 +10,7 @@ packages = [{include = "rooms_test"}]
 python = "^3.9"
 google-api-python-client = "^2.78.0"
 google-auth-oauthlib = "^1.0.0"
+colorama = "^0.4.6"
 
 
 [build-system]
