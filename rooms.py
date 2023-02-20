@@ -4,6 +4,7 @@
 
 from __future__ import print_function
 
+import datetime
 import os.path
 import pickle
 
@@ -12,13 +13,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/calendar.events",
+]
 
 
 def main():
-    """Shows basic usage of the Google Calendar API. Prints the start and name
-    of the next 10 events on the user's calendar.
-    """
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -44,7 +45,25 @@ def main():
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
         for calendar_list_entry in calendar_list["items"]:
             if "resource" in calendar_list_entry["id"]:
-                print(calendar_list_entry["summary"], calendar_list_entry["id"])
+                print(
+                    calendar_list_entry["summary"], calendar_list_entry["id"], end=" "
+                )
+                free_busy_query = {
+                    "timeMin": datetime.datetime.utcnow().isoformat() + "Z",
+                    "timeMax": (
+                        datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+                    ).isoformat()
+                    + "Z",
+                    "timeZone": "Europe/London",
+                    "items": [{"id": calendar_list_entry["id"]}],
+                }
+                free_busy_response = (
+                    service.freebusy().query(body=free_busy_query).execute()
+                )
+                if free_busy_response["calendars"][calendar_list_entry["id"]]["busy"]:
+                    print("Busy")
+                else:
+                    print("Free")
         page_token = calendar_list.get("nextPageToken")
         if not page_token:
             break
