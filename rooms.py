@@ -32,6 +32,12 @@ colorama.init()
 
 
 def authenticate():
+    """
+    Authenticate the user and return the credentials.
+
+    Returns:
+        creds (google.oauth2.credentials.Credentials): The credentials of the user.
+    """
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -53,6 +59,15 @@ def authenticate():
 
 
 def get_calendar_list(service):
+    """
+    Get the list of calendars from the Google Calendar API.
+
+    Args:
+        service (googleapiclient.discovery.Resource): The Google Calendar API service.
+
+    Returns:
+        calendar_list (list): A list of dictionaries containing the calendar information.
+    """
     page_token = None
     calendar_list = []
     while True:
@@ -69,6 +84,13 @@ def get_calendar_list(service):
 
 
 def check_availability(service, calendar_list_entry):
+    """
+    Check the availability of a meeting room.
+
+    Args:
+        service (googleapiclient.discovery.Resource): The Google Calendar API service.
+        calendar_list_entry (dict): A dictionary containing the calendar information.
+    """
     print(
         colorama.Style.RESET_ALL
         + calendar_list_entry["summary"].replace("Ostrava Office-3-", ""),
