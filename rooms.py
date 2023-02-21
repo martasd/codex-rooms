@@ -23,7 +23,7 @@ SCOPES = [
 colorama.init()
 
 
-def main():
+def authenticate():
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -41,43 +41,59 @@ def main():
         # Save the credentials for the next run
         with open("token.pickle", "wb") as token:
             pickle.dump(creds, token)
+    return creds
 
-    service = build("calendar", "v3", credentials=creds)
 
+def get_calendar_list(service):
     page_token = None
+    calendar_list = []
     while True:
-        calendar_list = service.calendarList().list(pageToken=page_token).execute()
-        for calendar_list_entry in calendar_list["items"]:
+        calendar_list_response = (
+            service.calendarList().list(pageToken=page_token).execute()
+        )
+        for calendar_list_entry in calendar_list_response["items"]:
             if "resource" in calendar_list_entry["id"]:
-                print(
-                    colorama.Style.RESET_ALL
-                    + calendar_list_entry["summary"].replace("Ostrava Office-3-", ""),
-                    end=" is ",
-                )
-                free_busy_query = {
-                    "timeMin": datetime.datetime.utcnow().isoformat() + "Z",
-                    "timeMax": (
-                        datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-                    ).isoformat()
-                    + "Z",
-                    "timeZone": "Europe/London",
-                    "items": [{"id": calendar_list_entry["id"]}],
-                }
-                free_busy_response = (
-                    service.freebusy().query(body=free_busy_query).execute()
-                )
-                if free_busy_response["calendars"][calendar_list_entry["id"]]["busy"]:
-                    print(
-                        colorama.Fore.RED + "BUSY until:",
-                        free_busy_response["calendars"][calendar_list_entry["id"]][
-                            "busy"
-                        ][0]["end"][11:16],
-                    )
-                else:
-                    print(colorama.Fore.GREEN + "FREE")
-        page_token = calendar_list.get("nextPageToken")
+                calendar_list.append(calendar_list_entry)
+        page_token = calendar_list_response.get("nextPageToken")
         if not page_token:
             break
+    return calendar_list
+
+
+def check_availability(service, calendar_list_entry):
+    print(
+        colorama.Style.RESET_ALL
+        + calendar_list_entry["summary"].replace("Ostrava Office-3-", ""),
+        end=" is ",
+    )
+    free_busy_query = {
+        "timeMin": datetime.datetime.utcnow().isoformat() + "Z",
+        "timeMax": (
+            datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        ).isoformat()
+        + "Z",
+        "timeZone": "Europe/London",
+        "items": [{"id": calendar_list_entry["id"]}],
+    }
+    free_busy_response = service.freebusy().query(body=free_busy_query).execute()
+    if free_busy_response["calendars"][calendar_list_entry["id"]]["busy"]:
+        print(
+            colorama.Fore.RED + "BUSY until:",
+            free_busy_response["calendars"][calendar_list_entry["id"]]["busy"][0][
+                "end"
+            ][11:16],
+        )
+    else:
+        print(colorama.Fore.GREEN + "FREE")
+
+
+def main():
+    creds = authenticate()
+    service = build("calendar", "v3", credentials=creds)
+
+    calendar_list = get_calendar_list(service)
+    for calendar_list_entry in calendar_list:
+        check_availability(service, calendar_list_entry)
 
 
 if __name__ == "__main__":
