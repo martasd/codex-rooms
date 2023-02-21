@@ -1,6 +1,14 @@
-# Python 3
-# Using, Google Calendar API get the list of all my Google calendars which have the string 'resource' in its id
-# and print the calendar names and their IDs.
+"""
+This script checks the availability of the meeting rooms in the Ostrava office.
+
+It uses the Google Calendar API to query the availability of the meeting rooms
+and prints the results to the console.
+
+The script requires a credentials.json file in the same directory.
+
+The credentials.json file can be obtained by following the instructions at
+https://developers.google.com/calendar/quickstart/python
+"""
 
 from __future__ import print_function
 
